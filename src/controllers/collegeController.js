@@ -16,18 +16,18 @@ const createCollege = async function(req,res){
 
 const getInternDetails = async(req,res)=>{
     try{
-        const {abbrevatedCollegeName,_id}= req.query.abbrevatedCollegeName;
-        if(!abbrevatedCollegeName && !_id)
+        const {name,_id}= req.query;
+        if(!name && !_id)
         {
             return res.status(400).send({status:false,message:"please provide college name or college id"});
         }
-        else if(abbrevatedCollegeName){
+        else if(name){
 
-        const college = await CollegeModel.findOne({name:abbrevatedCollegeName});
+        const college = await CollegeModel.findOne({name:name});
         if(!college){
             return res.status(404).send({status:false,message:"no such college present"});
         }
-        const interns = await InternModel.find({collegeId:college._id});
+        const interns = await InternModel.find({collegeId:college._id,isDeleted:false}).select({collegeId:0,isDeleted:0,__v:0});
 
         const responseData = {
             name: college.name,
@@ -37,6 +37,7 @@ const getInternDetails = async(req,res)=>{
           };
         return res.status(200).send({status:true, data:responseData});
         }
+
         else{
 
         const college = await CollegeModel.findById(_id);
