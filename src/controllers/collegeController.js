@@ -4,8 +4,10 @@ const InternModel = require('../models/internModel');
 const createCollege = async function(req,res){
  try{  
     const data = req.body;
-    const createdData = await CollegeModel.create(data)
-    return res.status(201).send({status:true,data:createdData});
+    const createdData = await CollegeModel.create(data);
+    const {name,fullName,logoLink}=createdData;
+    let collegeData={name,fullName,logoLink}
+    return res.status(201).send({status:true,data:collegeData});
     }
     catch(error){
         return res.status(500).send({status:false,message:error.message});

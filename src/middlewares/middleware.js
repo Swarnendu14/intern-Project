@@ -1,7 +1,6 @@
 const validator = require("validator")
 const isURL = require('is-url')
 const axios = require('axios')
-const mongoose = require('mongoose')
 const collegeModel=require('../models/collegeModel')
 const internModel=require('../models/internModel')
 
@@ -33,6 +32,10 @@ const validReqBodyCollege= async (req,res,next)=>{
     
     if (!validator.isURL(logoLink)) 
         return res.status(400).send({ status: false, msg: "invalid logoLink" })
+    
+    let logoCheck = await axios.get(logoLink).then(() => logoLink).catch(() => null)
+    if(!logoCheck) 
+        return res.status(400).send({status : false, message : "invalid longUrl"})
 
     let checkURL = await axios.get(logoLink).then(() => logoLink).catch(() => null)
     if(!checkURL) 
@@ -47,7 +50,7 @@ const validReqBodyCollege= async (req,res,next)=>{
 
 const validReqBodyIntern=async (req,res,next)=>{
     try{
-        
+
         const {name,email,mobile,collegeId}=req.body;
         if(!isValid(name))
             return res.status(400).send({status:false,message:"Please enter Intern Name"});
@@ -78,9 +81,13 @@ const validReqBodyIntern=async (req,res,next)=>{
         if(!isValid(mobile))
             return res.status(400).send({status:false,message:"Please enter Intern MobileNo"});
 
-        if(!("^\\d{10}$".test(mobile)))
-            return res.status(400).send({status:false,message:"Please enter valid Intern MobileNo"});
-        
+        if(!(/^[1-9][0-9]{9}$/.test(mobile)))
+            return res.status(400).send({status:false,message:"Please enter valid Intern MobileNo ( 10 digits )"});
+
+        let regMobile=await internModel.findOne({mobile:mobile});
+        if(regMobile)
+            return res.status(400).send({status:false,message:`${mobile} mobile number is already registered`})
+            
         next();
     }
     catch(err){
