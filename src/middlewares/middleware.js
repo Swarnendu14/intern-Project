@@ -34,7 +34,7 @@ const validReqBodyCollege= async (req,res,next)=>{
     if (!validator.isURL(logoLink)) 
         return res.status(400).send({ status: false, msg: "invalid logoLink" })
 
-    let checkURL = await axios.get(logoLink).then(() => longURL).catch(() => null)
+    let checkURL = await axios.get(logoLink).then(() => logoLink).catch(() => null)
     if(!checkURL) 
         return res.status(400).send({status : false, message : "invalid logoLink"})
 
@@ -47,6 +47,7 @@ const validReqBodyCollege= async (req,res,next)=>{
 
 const validReqBodyIntern=async (req,res,next)=>{
     try{
+        
         const {name,email,mobile,collegeId}=req.body;
         if(!isValid(name))
             return res.status(400).send({status:false,message:"Please enter Intern Name"});
@@ -64,17 +65,20 @@ const validReqBodyIntern=async (req,res,next)=>{
             return res.status(400).send({status:false,message:`${email} email address is already registered`})
            
         
-        if(!collegeId || typeof collegeId !=mongoose.Schema.Types.ObjectId)
+        if(!isValid(collegeId))
             return res.status(400).send({status:false,message:"Please enter Intern College Id"});
-           
+
+        if(!(/^[0-9a-f]{24}$/.test(collegeId)))
+            return res.status(400).send({status:false,message:"Please enter valid Intern College Id"});
+
         const colId=await collegeModel.findOne({_id:collegeId});
         if(!colId)
-            return res.status(400).send({status:false,message:"Please enter Valid College Id"});
+            return res.status(400).send({status:false,message:"College Id is not registered."});
 
         if(!isValid(mobile))
             return res.status(400).send({status:false,message:"Please enter Intern MobileNo"});
 
-        if(!(/^(\+\d{1,3}[- ]?)?\d{10}$/.test(mobile)))
+        if(!("^\\d{10}$".test(mobile)))
             return res.status(400).send({status:false,message:"Please enter valid Intern MobileNo"});
         
         next();
