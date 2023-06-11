@@ -32,10 +32,6 @@ const validReqBodyCollege= async (req,res,next)=>{
     
     if (!validator.isURL(logoLink)) 
         return res.status(400).send({ status: false, msg: "invalid logoLink" })
-    
-    let logoCheck = await axios.get(logoLink).then(() => logoLink).catch(() => null)
-    if(!logoCheck) 
-        return res.status(400).send({status : false, message : "invalid longUrl"})
 
     let checkURL = await axios.get(logoLink).then(() => logoLink).catch(() => null)
     if(!checkURL) 
